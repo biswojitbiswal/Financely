@@ -8,7 +8,7 @@ import userRouter from './routes/user.routes.js'
 const app = express();
 
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 7070;
 
 const allowedOrigins = process.env.NODE_ENV === "production"
   ? ["https://yoga-app-eta-nine.vercel.app"]
@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true, limit: "10mb"}))
 app.use(express.static("public"));
 
-app.use("/api/finance/user", userRouter);
+app.use("/api/financely/user", userRouter);
 
 
 app.get("/", (req, res) => {

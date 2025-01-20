@@ -6,6 +6,7 @@ import Form from 'react-bootstrap/Form';
 import { useAuth } from '../Store/Auth';
 import { toast } from 'react-toastify';
 import '../App.css'
+import { BASE_URL } from '../../config';
 
 function Signin() {
   const [signinData, setSignInData] = useState({
@@ -17,7 +18,7 @@ function Signin() {
   const navigate = useNavigate();
 
   if(isLoggedInuser){
-    return <Navigate to="/" />
+    return <Navigate to="/dashboard" />
   }
 
   const handleInput = (e) => {
@@ -27,10 +28,10 @@ function Signin() {
     })
   }
 
-  const handleSifninForm = async(e) => {
+  const handleSigninForm = async(e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/api/finance/user/signin`, {
+      const response = await fetch(`${BASE_URL}/api/financely/user/signin`, {
         method: "POST",
         headers:{
           "Content-Type": "application/json"
@@ -46,7 +47,7 @@ function Signin() {
         setTokenInCookies(data.token);
         refreshUser();
         setSignInData({email: "", password: ""});
-        navigate("/");
+        navigate("/dashboard");
       } else {
         toast.error(data.extraDetails ? data.extraDetails : data.message)
       }
@@ -59,10 +60,10 @@ function Signin() {
     <>
       <section id="form">
       <div className="signin-page">
-        <h1 className='text-primary mb-4'>Sign-In Form</h1>
-        <Form onSubmit={handleSifninForm}>
+        <h3 className='mb-4'>Sign In On <span className='text-primary'>Financely</span></h3>
+        <Form onSubmit={handleSigninForm}>
           <Form.Group className="mb-3" id="email">
-            <Form.Label>Email address</Form.Label>
+            <Form.Label>Email</Form.Label>
             <Form.Control type="email" name='email' placeholder="Enter email" value={signinData.email} onChange={handleInput} required />
           </Form.Group>
 
@@ -70,12 +71,14 @@ function Signin() {
             <Form.Label>Password</Form.Label>
             <Form.Control type="password" name='password' placeholder="Password" value={signinData.password} onChange={handleInput} required />
           </Form.Group>
-          <Button variant="primary" type="submit">
-            Submit
+          <Button variant="outline-primary" className='w-100 fs-5' type="submit">
+            Sign In With Email & Password
           </Button>
         </Form>
         <hr/>
-        <Link style={{textDecoration: "none"}} to="/signup">Don't have an Account! Create An Account</Link>
+        <div className='text-center'>
+        <Link className='fs-5' style={{textDecoration: "none"}} to="/signup">Don't have an Account! Sign Up</Link>
+        </div>
       </div>
       </section>
     </>

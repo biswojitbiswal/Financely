@@ -12,18 +12,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    phone: {
-        type: Number,
-        required: true,
-    },
     password: {
         type: String,
         required: true
     },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    }
 },{timestamps: true});
 
 userSchema.pre("save", async function(next) {

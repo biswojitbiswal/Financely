@@ -9,7 +9,7 @@ function Signout() {
     loggedOutUser();
   }, [loggedOutUser]);
 
-  return <Navigate to="/signin" />;
+  return <Navigate to="/" />;
 }
 
 export default Signout

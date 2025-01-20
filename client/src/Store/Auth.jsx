@@ -2,6 +2,7 @@ import React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
+import { BASE_URL } from "../../config";
 
 export const AuthContext = createContext();
 
@@ -36,7 +37,7 @@ export const AuthContextProvider = ({children}) => {
     const userAuthentication = async() => {
         try {
             setIsLoading(true)
-            const response = await fetch(`http://localhost:8000/api/finance/user/getuser`, {
+            const response = await fetch(`${BASE_URL}/api/financely/user/getuser`, {
                 method: "GET",
                 headers: {
                     Authorization: authorization
@@ -44,7 +45,7 @@ export const AuthContextProvider = ({children}) => {
             })
 
             const data = await response.json();
-            // console.log(data.userData);
+
 
             if(response.ok){
                 setUser((prevUser) =>
@@ -54,7 +55,6 @@ export const AuthContextProvider = ({children}) => {
                 setUser("");
             }
         } catch (error) {
-            toast.error("Failed to fetch user data. Please try again.");
             console.error(error);
         } finally {
             setIsLoading(false);

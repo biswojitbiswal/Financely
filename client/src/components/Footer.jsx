@@ -31,7 +31,7 @@ function Footer() {
               <i className="fa-brands fa-x-twitter"></i>
             </Link>
           </div>
-          <p>&copy; 2024 Location/Address. All Rights Reserved.</p>
+          <p>&copy; 2025 Financely All Rights Reserved.</p>
           <p>Designed & Developed By <strong className='text-primary'>Biswojit</strong></p>
       </footer>
     </>

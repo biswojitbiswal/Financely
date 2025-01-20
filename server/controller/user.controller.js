@@ -10,7 +10,7 @@ const generateAccessToken = async(userId) => {
         }
 
         const accessToken = await user.generateToken();
-        console.log(accessToken)
+        // console.log(accessToken)
         return {accessToken}
     } catch (error) {
         throw new Error("Something Went Wrong While Generating Access Token");
@@ -19,9 +19,9 @@ const generateAccessToken = async(userId) => {
 
 const registerUser = async(req, res) => {
     try {
-        const {name, email, phone, password} = req.body;
+        const {name, email, password, cpassword} = req.body;
     
-        if([name, email, phone, password].some((field) => field?.trim() === "")){
+        if([name, email, password, cpassword].some((field) => field?.trim() === "")){
             return res.status(400).json({message: "All Fields are Required!"})
         }
 
@@ -29,6 +29,10 @@ const registerUser = async(req, res) => {
             email.indexOf('@') === 0 || email.indexOf('.') === email.length - 1 || 
             email.indexOf('@') > email.indexOf('.')) {
             return res.status(400).json({ message: "Fill Correct Email" });
+        }
+
+        if(password !== cpassword){
+            return res.status(400).json({message: "Password & Confirm Password Does Not Same"})
         }
     
         const userExist = await User.findOne({email});
@@ -40,7 +44,6 @@ const registerUser = async(req, res) => {
         const user = await User.create({
             name,
             email,
-            phone,
             password,
         })
     
