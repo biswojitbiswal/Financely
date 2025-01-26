@@ -13,7 +13,7 @@ export const useAuth = () => {
 export const AuthContextProvider = ({children}) => {
     const [token, setToken] = useState(Cookies.get('accessToekn'));
     const [user, setUser] = useState("");
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
     const [forceUpdate, setForceUpdate] = useState(false);
 
 

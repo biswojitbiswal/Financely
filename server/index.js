@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import connectDb from './DB/db.js';
 import userRouter from './routes/user.routes.js'
+import transactionRouter from './routes/transaction.routes.js'
 
 
 const app = express();
@@ -25,6 +26,7 @@ app.use(express.urlencoded({extended: true, limit: "10mb"}))
 app.use(express.static("public"));
 
 app.use("/api/financely/user", userRouter);
+app.use("/api/financely/transaction", transactionRouter);
 
 
 app.get("/", (req, res) => {

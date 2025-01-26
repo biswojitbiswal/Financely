@@ -11,7 +11,7 @@ function MyNavbar() {
   return (
     <>
       <Navbar className="bg-primary">
-        <Container>
+        <Container className=''>
         <Navbar.Brand href="/dashboard" className='text-white fs-2'>Financely</Navbar.Brand>
         {
           isLoggedInuser ? <Nav.Link href="/signout" className='text-white fs-4'>Sign Out</Nav.Link> : <Nav.Link href="/" className='text-white fs-4'>Sign In</Nav.Link>
