@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../Store/Auth';
 import { BASE_URL } from '../../../config';
-import Table from 'react-bootstrap/Table';
-import Form from 'react-bootstrap/Form'
-import Button from 'react-bootstrap/Button';
-import Spinner from 'react-bootstrap/Spinner';
-import Badge from 'react-bootstrap/Badge';
+import { Table, Form, Button, Badge, Spinner } from 'react-bootstrap';
+import ExportImport from './ExportImport';
 
 function TransTable() {
     const [transactions, setTransactions] = useState([]);
@@ -63,6 +60,7 @@ function TransTable() {
         getAllTransaction(sortOption, sortOrder, searchTerm, filter)
     }
 
+
     useEffect(() => {
         getAllTransaction(sortOption, sortOrder, searchTerm, filterType);
     }, [sortOption, sortOrder, filterType]);
@@ -88,7 +86,7 @@ function TransTable() {
                         <option value="Credit Card">Credit Card</option>
                         <option value="Bank Transfer">Bank Transfer</option>
                     </Form.Select>
-                    
+
 
                 </div>
                 <div className="w-100 mt-2 p-2 d-flex flex-column justify-content-center rounded-2" style={{ backgroundColor: '#f1f1f1' }}>
@@ -98,16 +96,21 @@ function TransTable() {
                                 No Sort
                             </Button>
                             <Button variant="outline-primary" onClick={() => handleSort('date')} active={sortOption === 'date'}>
-                                Sort by Date
+                                Sort By Date
                             </Button>
                             <Button variant="outline-primary" onClick={() => handleSort('amount')} active={sortOption === 'amount'}>
-                                Sort by Amount
+                                Sort By Amount
                             </Button>
                         </div>
-                        <div className='d-flex gap-2'>
-                            <Button variant='primary'>Import</Button>
-                            <Button variant='primary'>Export</Button>
-                        </div>
+
+                        <ExportImport
+                            transactions={transactions}
+                            getAllTransaction={getAllTransaction}
+                            sortOption={sortOption}
+                            sortOrder={sortOrder}
+                            searchTerm={searchTerm}
+                            filterType={filterType}
+                        />
                     </div>
                     <Table responsive="sm" className='text-center fs-5'>
                         <thead>
