@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 7070;
 
 const allowedOrigins = process.env.NODE_ENV === "production"
-  ? ["https://yoga-app-eta-nine.vercel.app"]
+  ? ["https://financely-five.vercel.app"]
   : "*";
 
 app.use(cors({
