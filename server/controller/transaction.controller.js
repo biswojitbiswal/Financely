@@ -165,19 +165,31 @@ const incomeAnalytic = async (req, res) => {
     } else if (timeRange === "yearly") {
       startDate = new Date();
       startDate.setFullYear(startDate.getFullYear() - 1);
+    } else {
+      return res.status(400).json({ message: "Invalid time range" });
     }
 
-    const incomeData = await Transaction.find({
-      date: { $gte: startDate },
-      transType: "Income",
-    }).sort({ date: 1 });
+    const incomeData = await Transaction.aggregate([
+      {
+        $match: {
+          addBy: req.user._id,
+          transType: "Income",
+          date: { $gte: startDate }
+        }
+      },
+      {
+        $sort: { date: 1 }
+      },
+      {
+        $project: {
+          _id: 0,
+          x: "$date",
+          y: "$amount"
+        }
+      }
+    ]);
 
-    const chartData = incomeData.map((data) => ({
-      x: data.date,
-      y: data.amount,
-    }));
-
-    return res.status(200).json({ chartData });
+    return res.status(200).json({ chartData: incomeData });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Errors" });
@@ -203,6 +215,7 @@ const expenseAnalytic = async (req, res) => {
     const expenseData = await Transaction.aggregate([
       {
         $match: {
+          addBy: req.user._id,
           date: { $gte: startDate },
           transType: "Expense",
         },

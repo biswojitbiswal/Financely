@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { useAuth } from '../Store/Auth';
+import { useAuth } from '../../Store/Auth';
 import { toast } from 'react-toastify';
-import '../App.css'
-import { BASE_URL } from '../../config';
+import '../../App.css'
+import { BASE_URL } from '../../../config';
 
 function Signin() {
   const [signinData, setSignInData] = useState({
@@ -59,7 +59,7 @@ function Signin() {
   return (
     <>
       <section id="form">
-      <div className="signin-page">
+      <div className="signin-page bg-light">
         <h3 className='mb-4'>Sign In On <span className='text-primary'>Financely</span></h3>
         <Form onSubmit={handleSigninForm}>
           <Form.Group className="mb-3" id="email">

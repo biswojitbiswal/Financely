@@ -75,8 +75,8 @@ function TransTable({ transactions }) {
                             })
                         ) : (
                             <tr>
-                                <td colSpan="7" className="text-center">
-                                    <Spinner animation="border" className='mt-2' variant="primary" />
+                                <td colSpan="9" className="text-center">
+                                    Not Found
                                 </td>
                             </tr>
                         )

@@ -4,9 +4,9 @@ import { useNavigate, Navigate, Link } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { toast } from 'react-toastify';
-import { useAuth } from '../Store/Auth';
-import '../App.css'
-import { BASE_URL } from '../../config';
+import { useAuth } from '../../Store/Auth';
+import '../../App.css'
+import { BASE_URL } from '../../../config';
 
 
 function Signup() {
@@ -69,7 +69,7 @@ function Signup() {
     return (
         <>
             <section id="form">
-                <div className='signin-page'>
+                <div className='signin-page bg-light'>
                     <h3 className='mb-4'>Sign Up On <span className='text-primary '>Financely</span></h3>
                     <Form onSubmit={handleSignupForm}>
                         <Form.Group className="mb-3" controlId="name">

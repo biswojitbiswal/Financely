@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import '../App.css'
-import { useAuth } from '../Store/Auth'
+import '../../App.css'
+import { useAuth } from '../../Store/Auth'
 import { useNavigate } from 'react-router-dom'
-import Cards from './DashComponent.jsx/Cards'
-import TransactionModal from './Modal/TransactionModal'
-import { BASE_URL } from '../../config'
+import Cards from '../DashComponent.jsx/Cards'
+import TransactionModal from '../Modal/TransactionModal'
+import { BASE_URL } from '../../../config'
 import { toast } from 'react-toastify'
-import Transaction from './TransTable/Transaction'
-import Analytic from './Analytics/Analytic'
-import {useRefresh} from '../Store/RefreshContext'
+import Transaction from '../TransTable/Transaction'
+import Analytic from '../Analytics/Analytic'
+import {useRefresh} from '../../Store/RefreshContext'
 
 function Home() {
   const [modalType, setModalType] = useState(null);
