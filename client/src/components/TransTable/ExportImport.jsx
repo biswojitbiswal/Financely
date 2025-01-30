@@ -3,12 +3,14 @@ import { Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { BASE_URL } from '../../../config';
 import { useAuth } from '../../Store/Auth';
+import { useRefresh } from '../../Store/RefreshContext';
 
-function ExportImport({ transactions, getAllTransaction, sortOption, sortOrder, searchTerm, filterType }) {
+function ExportImport({ transactions }) {
     const [file, setFile] = useState(null);
     const [isFileSelected, setIsFileSelected] = useState(false)
 
     const {authorization} = useAuth();
+    const {toggleRefresh} = useRefresh();
 
     const handleFile = (e) => {
         const selectedFile = e.target.files[0];
@@ -39,7 +41,7 @@ function ExportImport({ transactions, getAllTransaction, sortOption, sortOrder, 
 
             if (response.ok) {
                 toast.success("Transactions imported successfully");
-                getAllTransaction(sortOption, sortOrder, searchTerm, filterType);
+                toggleRefresh()
                 setFile(null);
                 setIsFileSelected(false);
             } else {
@@ -83,6 +85,7 @@ function ExportImport({ transactions, getAllTransaction, sortOption, sortOrder, 
         link.click();
         document.body.removeChild(link);
     }
+    
     return (
         <>
             <div className='d-flex gap-2'>

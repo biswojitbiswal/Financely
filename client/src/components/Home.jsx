@@ -6,7 +6,9 @@ import Cards from './DashComponent.jsx/Cards'
 import TransactionModal from './Modal/TransactionModal'
 import { BASE_URL } from '../../config'
 import { toast } from 'react-toastify'
-import TransTable from './TransTable/TransTable'
+import Transaction from './TransTable/Transaction'
+import Analytic from './Analytics/Analytic'
+import {useRefresh} from '../Store/RefreshContext'
 
 function Home() {
   const [modalType, setModalType] = useState(null);
@@ -18,6 +20,7 @@ function Home() {
   const [loading, setLoading] = useState(false);
 
   const { isLoggedInuser, authorization } = useAuth()
+  const {refresh, toggleRefresh} = useRefresh();
   const navigate = useNavigate();
 
   if (!isLoggedInuser) {
@@ -69,6 +72,7 @@ function Home() {
       if(response.ok){
         toast.success("Transaction Added");
         totalSummary();
+        toggleRefresh()
       } else {
         toast.error("Transaction failed. Please try again.");
       }
@@ -78,9 +82,11 @@ function Home() {
     }
   }
 
+
+
   useEffect(() => {
     totalSummary()
-  }, [])
+  }, [refresh])
 
   return (
     <>
@@ -95,10 +101,11 @@ function Home() {
           handleTransaction={handleTransaction}
         />
         }
-        <TransTable />
+        <Analytic />
+        <Transaction />
       </section>
     </>
   )
 }
 
-export default Home
+export default Home;

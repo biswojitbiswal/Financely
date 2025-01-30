@@ -1,6 +1,7 @@
 import { Transaction } from "../model/transaction.model.js";
 import processCSV from "../utils/processCsv.util.js";
-import fs from 'fs'
+import mongoose from "mongoose";
+import fs from "fs";
 
 const addTransaction = async (req, res) => {
   try {
@@ -150,9 +151,152 @@ const getAllTransaction = async (req, res) => {
   }
 };
 
+const incomeAnalytic = async (req, res) => {
+  try {
+    const { timeRange } = req.params;
+    let startDate;
+
+    if (timeRange === "weekly") {
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+    } else if (timeRange === "monthly") {
+      startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 1);
+    } else if (timeRange === "yearly") {
+      startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - 1);
+    }
+
+    const incomeData = await Transaction.find({
+      date: { $gte: startDate },
+      transType: "Income",
+    }).sort({ date: 1 });
+
+    const chartData = incomeData.map((data) => ({
+      x: data.date,
+      y: data.amount,
+    }));
+
+    return res.status(200).json({ chartData });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Errors" });
+  }
+};
+
+const expenseAnalytic = async (req, res) => {
+  try {
+    const { timeRange } = req.params;
+    let startDate;
+
+    if (timeRange === "weekly") {
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+    } else if (timeRange === "monthly") {
+      startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 1);
+    } else if (timeRange === "yearly") {
+      startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - 1);
+    }
+
+    const expenseData = await Transaction.aggregate([
+      {
+        $match: {
+          date: { $gte: startDate },
+          transType: "Expense",
+        },
+      },
+      {
+        $group: {
+          _id: "$tag",
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          label: "$_id",
+          value: "$totalAmount",
+          _id: 0,
+        },
+      },
+    ]);
+
+    return res.status(200).json({ chartData: expenseData });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Errors" });
+  }
+};
+
+const deleteById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Transaction ID" });
+    }
+
+    const transaction = await Transaction.findByIdAndDelete(id);
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction Not Found" });
+    }
+
+    return res.status(200).json({ message: "Transaction Deleted" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Errors" });
+  }
+};
+
+const handleEditById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { transName, amount, tag, paymentMode, date } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Transaction ID" });
+    }
+
+    if (
+      [transName, date, tag, paymentMode].some(field => field?.trim() === "") || amount === undefined
+    ) {
+      return res.status(400).json({ message: "All Fields Are Required!" });
+    }
+
+    const transaction = await Transaction.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          transName,
+          amount,
+          date,
+          tag,
+          paymentMode,
+        }
+      },
+      {new: true},
+    )
+
+    if(!transaction){
+      return res.status(404).json({message: "Not Found"});
+    }
+
+    return res.status(200).json({message: "Transaction Updated", transaction})
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Errors" });
+  }
+};
+
 export {
   addTransaction,
   importTransaction,
   fetchTotalSummary,
   getAllTransaction,
+  incomeAnalytic,
+  expenseAnalytic,
+  deleteById,
+  handleEditById,
 };

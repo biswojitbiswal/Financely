@@ -1,159 +1,91 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../Store/Auth';
+import React from 'react'
+import { Table, Spinner, Badge, Button } from 'react-bootstrap';
+import EditModal from './EditModal';
 import { BASE_URL } from '../../../config';
-import { Table, Form, Button, Badge, Spinner } from 'react-bootstrap';
-import ExportImport from './ExportImport';
+import { toast } from 'react-toastify';
+import { useAuth } from '../../Store/Auth';
+import { useRefresh } from '../../Store/RefreshContext';
 
-function TransTable() {
-    const [transactions, setTransactions] = useState([]);
-    const [sortOption, setSortOption] = useState('createdAt');
-    const [sortOrder, setSortOrder] = useState('desc');
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterType, setFilterType] = useState("");
 
-    const { authorization } = useAuth();
+function TransTable({ transactions }) {
+    const {authorization} = useAuth();
+    const {toggleRefresh} = useRefresh()
+    
+    const handleDelete = async(id) => {
+        const confirmDelete = window.confirm("Are you sure you want to Delete");
 
-    let timeoutId;
+        if (!confirmDelete) return;
 
-    const getAllTransaction = async (sortBy, sortOrder, search, filter) => {
         try {
-            const response = await fetch(`${BASE_URL}/api/financely/transaction/get?sortBy=${sortBy}&sortOrder=${sortOrder}&search=${search}&filter=${filter}`, {
-                method: "GET",
+            const response = await fetch(`${BASE_URL}/api/financely/transaction/delete/${id}`, {
+                method: "DELETE",
                 headers: {
                     Authorization: authorization,
-                }
-            });
+                },
+            })
 
             const data = await response.json();
             console.log(data);
 
-            if (response.ok) {
-                setTransactions(data);
+            if(response.ok){
+                toast.success("Transaction Deleted");
+                toggleRefresh();
             }
         } catch (error) {
             console.log(error);
+            toast.error("An Error Occured While Delete")
         }
     }
-
-    const handleSort = (option) => {
-        const newSortOrder = sortOption === option && sortOrder === 'asc' ? 'desc' : 'asc'; // Toggle between 'asc' and 'desc'
-        setSortOption(option);
-        setSortOrder(newSortOrder);
-        getAllTransaction(option, newSortOrder, searchTerm, filterType);
-    }
-
-    const handleSearch = (e) => {
-        const value = e.target.value;
-        setSearchTerm(value);
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-        }
-
-        timeoutId = setTimeout(() => {
-            getAllTransaction(sortOption, sortOrder, value, filterType);
-        }, 1000);
-    }
-
-    const handleFilterChange = (e) => {
-        const filter = e.target.value
-        setFilterType(filter);
-        getAllTransaction(sortOption, sortOrder, searchTerm, filter)
-    }
-
-
-    useEffect(() => {
-        getAllTransaction(sortOption, sortOrder, searchTerm, filterType);
-    }, [sortOption, sortOrder, filterType]);
+    
 
     return (
         <>
-            <section className='my-2'>
-                <div className="d-flex gap-2">
-                    <Form.Control
-                        type="text"
-                        id="inputSearch"
-                        aria-describedby="searchBlock"
-                        placeholder='Search Here'
-                        value={searchTerm}
-                        onChange={handleSearch}
-                    />
-                    <Form.Select aria-label="Default select example" onChange={handleFilterChange} className='w-25'>
-                        <option value="">All</option>
-                        <option value="Income">Income</option>
-                        <option value="Expense">Expense</option>
-                        <option value="Cash">Cash</option>
-                        <option value="UPI">UPI</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                    </Form.Select>
-
-
-                </div>
-                <div className="w-100 mt-2 p-2 d-flex flex-column justify-content-center rounded-2" style={{ backgroundColor: '#f1f1f1' }}>
-                    <div className="my-2 d-flex justify-content-between">
-                        <div className="d-flex gap-2">
-                            <Button variant="outline-primary" onClick={() => handleSort('createdAt')} active={sortOption === 'createdAt'}>
-                                No Sort
-                            </Button>
-                            <Button variant="outline-primary" onClick={() => handleSort('date')} active={sortOption === 'date'}>
-                                Sort By Date
-                            </Button>
-                            <Button variant="outline-primary" onClick={() => handleSort('amount')} active={sortOption === 'amount'}>
-                                Sort By Amount
-                            </Button>
-                        </div>
-
-                        <ExportImport
-                            transactions={transactions}
-                            getAllTransaction={getAllTransaction}
-                            sortOption={sortOption}
-                            sortOrder={sortOrder}
-                            searchTerm={searchTerm}
-                            filterType={filterType}
-                        />
-                    </div>
-                    <Table responsive="sm" className='text-center fs-5'>
-                        <thead>
-                            <tr className='fs-4'>
-                                <th>SL No.</th>
-                                <th>Name</th>
-                                <th>Tag</th>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Type</th>
-                                <th>Payment Mode</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                transactions && transactions.length > 0 ? (
-                                    transactions.map((item, index) => {
-                                        return (
-                                            <tr key={item._id}>
-                                                <td>{index + 1}</td>
-                                                <td>{item.transName}</td>
-                                                <td>{item.tag}</td>
-                                                <td>{new Date(item.date).toLocaleDateString('en-GB').replace(/\//g, '-')}</td>
-                                                <td className={`${item.transType === 'Income' ? 'text-success' : 'text-danger'}`}>{item.transType === 'Income' ? `+${item.amount.toLocaleString()}` : `-${item.amount.toLocaleString()}`}</td>
-                                                <td><Badge className='p-2' bg={item.transType === 'Income' ? 'success' : 'danger'}>{item.transType}</Badge></td>
-                                                <td><Badge className='p-2' bg="primary">{item.paymentMode}</Badge></td>
-                                            </tr>
-                                        );
-                                    })
-                                ) : (
-                                    <tr>
-                                        <td colSpan="7" className="text-center">
-                                            <Spinner animation="border" className='mt-2' variant="primary" />
+            <Table responsive="sm" className='text-center fs-5'>
+                <thead>
+                    <tr className='fs-4'>
+                        <th>SL No.</th>
+                        <th>Name</th>
+                        <th>Tag</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Payment Mode</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        transactions && transactions.length > 0 ? (
+                            transactions.map((item, index) => {
+                                return (
+                                    <tr key={item._id}>
+                                        <td>{index + 1}</td>
+                                        <td>{item.transName}</td>
+                                        <td>{item.tag}</td>
+                                        <td>{new Date(item.date).toLocaleDateString('en-GB').replace(/\//g, '-')}</td>
+                                        <td className={`${item.transType === 'Income' ? 'text-success' : 'text-danger'}`}>{item.transType === 'Income' ? `+${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : `-${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                         </td>
+                                        <td><Badge className='p-2' bg={item.transType === 'Income' ? 'success' : 'danger'}>{item.transType}</Badge></td>
+                                        <td><Badge className='p-2' bg="primary">{item.paymentMode}</Badge></td>
+                                        <td><EditModal item={item} type={item.transType} /></td>
+                                        <td><Button variant='light' onClick={() => handleDelete(item._id)} className='text-danger fs-3'><i className="fa-solid fa-trash"></i></Button></td>
                                     </tr>
-                                )
-                            }
-                        </tbody>
-                    </Table>
-                </div>
-            </section>
+                                );
+                            })
+                        ) : (
+                            <tr>
+                                <td colSpan="7" className="text-center">
+                                    <Spinner animation="border" className='mt-2' variant="primary" />
+                                </td>
+                            </tr>
+                        )
+                    }
+                </tbody>
+                
+            </Table>
         </>
-    );
+    )
 }
 
-export default TransTable;
+export default TransTable
