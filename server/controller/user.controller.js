@@ -130,9 +130,60 @@ const getCurrUser = async(req, res) => {
     }
 }
 
+const authnticateWithGoogle = async(req, res, next) => {
+    try {
+        const {name, email } = req.body;
+
+        if([name, email].some((field) => field?.trim() === "")){
+            return res.status(400).json({message: "All Fields are Required!"})
+        }
+
+        const userExist = await User.findOne({email});
+
+        if(userExist){
+            const {accessToken} = await generateAccessToken(userExist._id);
+
+            const loginUser = await User.findById(userExist._id).select("-password -cart");
+
+            return res.status(200).json({
+                message: "User Login Successfully",
+                user: loginUser,
+                userId: loginUser._id,
+                token: accessToken,
+            });
+        } else {
+            const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
+
+            const newUser = await User.create({
+                name,
+                email,
+                password: generatedPassword,
+            }).select("-password");
+
+            if (!newUser) {
+                return res
+                  .status(500)
+                  .json({ message: "Something went wrong while registering user" });
+            }
+
+            const {accessToken} = await generateAccessToken(newUser._id);
+
+            return res.status(200).json({
+                message: "User Registered Successfully",
+                user: newUser,
+                userId: newUser._id.toString(),
+                token: accessToken,
+              });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 export {
     registerUser,
     loginUser,
-    getCurrUser
-
+    getCurrUser,
+    authnticateWithGoogle
 }

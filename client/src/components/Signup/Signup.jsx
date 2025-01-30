@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../../Store/Auth';
 import '../../App.css'
 import { BASE_URL } from '../../../config';
+import Google from '../Google/Google';
 
 
 function Signup() {
@@ -95,8 +96,8 @@ function Signup() {
                     </Form>
                     <hr />
                     <div className='text-center'>
-                    <Link className='fs-5' style={{ textDecoration: "none" }} to="/">Already have An Account! Sign in</Link>
-
+                        <Google />
+                        <Link className='fs-5' style={{ textDecoration: "none" }} to="/">Already have An Account! Sign in</Link>
                     </div>
                 </div>
             </section>

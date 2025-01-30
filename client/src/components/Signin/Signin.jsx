@@ -7,6 +7,7 @@ import { useAuth } from '../../Store/Auth';
 import { toast } from 'react-toastify';
 import '../../App.css'
 import { BASE_URL } from '../../../config';
+import Google from '../Google/Google';
 
 function Signin() {
   const [signinData, setSignInData] = useState({
@@ -77,6 +78,7 @@ function Signin() {
         </Form>
         <hr/>
         <div className='text-center'>
+        <Google />
         <Link className='fs-5' style={{textDecoration: "none"}} to="/signup">Don't have an Account! Sign Up</Link>
         </div>
       </div>
