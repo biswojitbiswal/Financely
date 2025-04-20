@@ -1,0 +1,71 @@
+.summary-card{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+.summ-btn{
+    font-size: 1.25rem;
+}
+.balance-card{
+    display: flex;
+    justify-content: space-between;
+}
+
+@media (max-width: 1250px) {
+    .summary-card{
+        gap: .75rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .card-number{
+        font-size: .9rem;
+    }
+    .expiry-date{
+        font-size: .9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-number{
+        font-size: 1rem;
+        margin-bottom: .5rem;
+    }
+    .expiry-date{
+        font-size: 1rem;
+        margin-bottom: .5rem;
+    }
+    .summ-btn{
+        font-size: .75rem;
+    }
+    .balance-card{
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 560px) {
+    .summary-card{
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+    }
+    .summ-card{
+        width: 100%;
+    }
+    .card-number{
+        font-size: 1.5rem;
+    }
+    .expiry-date{
+        font-size: 1.5rem;
+    }
+    .summ-btn{
+        font-size: 1.25rem;
+    }
+    .balance-card{
+        display: flex;
+        flex-direction: row;
+    }
+}
+

@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form'
 import {toast} from 'react-toastify'
+import { useDate } from '../../Store/DateContext';
 
 function TransactionModal({show, onClose, type, handleTransaction}) {
     const [formData, setFormData] = useState({
@@ -12,6 +13,28 @@ function TransactionModal({show, onClose, type, handleTransaction}) {
         tag: '',
         paymentMode: ''
     })
+
+    const {selectedMonth, selectedYear} = useDate();
+
+    useEffect(() => {
+        if (show && selectedYear && selectedMonth) {
+            let day = 1;
+            const currentDate = new Date();
+            
+            if (selectedYear === currentDate.getFullYear() && selectedMonth === currentDate.getMonth() + 1) {
+                day = currentDate.getDate();
+            }
+            
+            const month = selectedMonth.toString().padStart(2, '0');
+            const dayStr = day.toString().padStart(2, '0');
+            const dateStr = `${selectedYear}-${month}-${dayStr}`;
+            
+            setFormData(prevState => ({
+                ...prevState,
+                date: dateStr
+            }));
+        }
+    }, [show, selectedYear, selectedMonth]);
 
     const tags = type === 'Income'
     ? ['Salary', 'Freelancing', 'Investment', 'Bonus', 'Others'] : ['Education', 'Food', 'Health', 'Investment', 'Recharge', 'Rent', 'Transport', 'Others'];

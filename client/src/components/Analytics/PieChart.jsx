@@ -4,6 +4,7 @@ import { useAuth } from '../../Store/Auth';
 import { Button, Spinner } from 'react-bootstrap'
 import { BASE_URL } from '../../../config';
 import { useRefresh } from '../../Store/RefreshContext';
+import { useDate } from '../../Store/DateContext';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement);
@@ -15,18 +16,21 @@ function PieChart() {
 
   const { authorization } = useAuth();
   const {refresh} = useRefresh();
+  const {selectedYear, selectedMonth} = useDate();
+
+  const isCurrentMonth = new Date().getMonth() === selectedMonth - 1
 
   const fetchDataPie = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`${BASE_URL}/api/financely/transaction/expense/${timeRange}`, {
+      const response = await fetch(`${BASE_URL}/api/financely/transaction/expense/${timeRange}?year=${selectedYear}&month=${selectedMonth}`, {
         method: "GET",
         headers: {
           Authorization: authorization,
         },
       });
       const data = await response.json();
-      // console.log(data);
+      console.log(data);
 
       if (response.ok) {
         setPieData(data.chartData);
@@ -41,7 +45,7 @@ function PieChart() {
 
   useEffect(() => {
     fetchDataPie();
-  }, [timeRange, refresh])
+  }, [timeRange, refresh, selectedYear, selectedMonth])
 
   const data = {
     labels: pieData.map(item => item.label),
@@ -67,21 +71,23 @@ function PieChart() {
 
 
   return (
-    <div className='bg-light p-2 gap-2 d-flex flex-column justify-content-between align-items-center' style={{ width: "33%" }}>
-      <div className='d-flex justify-content-between w-100'>
+    <div className='bg-light p-2 gap-2 pie-chart'>
+      <div className='pie-header w-100'>
         <h3 className='text-secondary'>Expense</h3>
-        <div className='d-flex gap-2'>
-          <Button variant='outline-primary' onClick={() => setTimeRange('weekly')} active={timeRange === 'weekly'}>Weekly</Button>
+        <div className='d-flex gap-1'>
+          {
+            isCurrentMonth ? <Button variant='outline-primary' onClick={() => setTimeRange('weekly')} active={timeRange === 'weekly'}>Weekly</Button> : <></>
+          }
           <Button variant='outline-primary' onClick={() => setTimeRange('monthly')} active={timeRange === 'monthly'}>Monthly</Button>
           <Button variant='outline-primary' onClick={() => setTimeRange('yearly')} active={timeRange === 'yearly'}>Yearly</Button>
         </div>
         
       </div>
-      <div className="w-100 h-100"  >
+      <div className="w-100 d-flex justify-content-center align-items-center pie-chart-graph"  >
           {loading ? (
             <Spinner size='lg' variant='primary' />
           ) : (
-            <Doughnut data={data} options={options} />
+             pieData.length > 0 ? <Doughnut data={data} options={options} /> : <p className='fs-3 text-secondary'>No Expenses Found</p>
           )}
         </div>
     </div>

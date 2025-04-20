@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 import Transaction from '../TransTable/Transaction'
 import Analytic from '../Analytics/Analytic'
 import {useRefresh} from '../../Store/RefreshContext'
+import {useDate} from '../../Store/DateContext'
 
 function Home() {
   const [modalType, setModalType] = useState(null);
@@ -18,9 +19,12 @@ function Home() {
     expense: 0,
   });
   const [loading, setLoading] = useState(false);
+  
+
 
   const { isLoggedInuser, authorization } = useAuth()
   const {refresh, toggleRefresh} = useRefresh();
+  const {selectedYear, selectedMonth} = useDate()
   const navigate = useNavigate();
 
   if (!isLoggedInuser) {
@@ -33,7 +37,7 @@ function Home() {
   const totalSummary = async() => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/api/financely/transaction/summary/`, {
+      const response = await fetch(`${BASE_URL}/api/financely/transaction/summary?year=${selectedYear}&month=${selectedMonth}`, {
         method: "GET",
         headers: {
           Authorization: authorization,
@@ -86,7 +90,7 @@ function Home() {
 
   useEffect(() => {
     totalSummary()
-  }, [refresh])
+  }, [refresh, selectedMonth, selectedYear])
 
   return (
     <>

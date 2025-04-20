@@ -2,6 +2,7 @@ import { Transaction } from "../model/transaction.model.js";
 import processCSV from "../utils/processCsv.util.js";
 import mongoose from "mongoose";
 import fs from "fs";
+import { time } from "console";
 
 const addTransaction = async (req, res) => {
   try {
@@ -70,14 +71,38 @@ const importTransaction = async (req, res) => {
 const fetchTotalSummary = async (req, res) => {
   try {
     const userId = req.user?._id;
+    const { year = new Date().getFullYear(), month = new Date().getMonth() } =
+      req.query;
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    endDate.setHours(23, 59, 59, 999);
 
     const totalIncome = await Transaction.aggregate([
-      { $match: { addBy: userId, transType: "Income" } },
+      {
+        $match: {
+          addBy: userId,
+          transType: "Income",
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
 
     const totalExpense = await Transaction.aggregate([
-      { $match: { addBy: userId, transType: "Expense" } },
+      {
+        $match: {
+          addBy: userId,
+          transType: "Expense",
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
 
@@ -104,11 +129,16 @@ const getAllTransaction = async (req, res) => {
       sortOrder = "dsc",
       search = "",
       filter = "",
+      year = new Date().getFullYear(),
+      month = new Date().getMonth(),
     } = req.query;
+
+    // console.log(year, month);
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized Access" });
     }
+
     let query = { addBy: userId };
 
     if (search) {
@@ -116,6 +146,17 @@ const getAllTransaction = async (req, res) => {
         { transName: { $regex: search, $options: "i" } },
         { tag: { $regex: search, $options: "i" } },
       ];
+    }
+
+    if (year && month) {
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
+      endDate.setHours(23, 59, 59, 999);
+      // console.log(startDate, endDate)
+      query.date = {
+        $gte: startDate,
+        $lte: endDate,
+      };
     }
 
     if (filter) {
@@ -154,19 +195,36 @@ const getAllTransaction = async (req, res) => {
 const incomeAnalytic = async (req, res) => {
   try {
     const { timeRange } = req.params;
-    let startDate;
+    const { year, month } = req.query;
 
-    if (timeRange === "weekly") {
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 7);
-    } else if (timeRange === "monthly") {
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 1);
-    } else if (timeRange === "yearly") {
-      startDate = new Date();
-      startDate.setFullYear(startDate.getFullYear() - 1);
-    } else {
-      return res.status(400).json({ message: "Invalid time range" });
+    let startDate, endDate;
+    const currentMonth = new Date();
+
+    if (year && month) {
+      const selectedYear = parseInt(year);
+      const selectedMonth = parseInt(month);
+
+      if (
+        timeRange === "weekly" &&
+        selectedYear === new Date().getFullYear() &&
+        selectedMonth === new Date().getMonth() + 1
+      ) {
+        startDate = new Date(); 
+        startDate.setDate(startDate.getDate() - 7);
+        endDate = new Date();
+      } else if (timeRange === "monthly") {
+        startDate = new Date(selectedYear, selectedMonth - 1, 1);
+        endDate = new Date(selectedYear, selectedMonth, 0);
+        endDate.setHours(23, 59, 59, 999);
+      } else if (timeRange === "yearly") {
+        startDate = new Date(selectedYear - 1, selectedMonth - 1, 1);
+        endDate = new Date(selectedYear, selectedMonth, 0);
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        startDate = new Date(selectedYear, selectedMonth - 1, 1);
+        endDate = new Date(selectedYear, selectedMonth, 0);
+        endDate.setHours(23, 59, 59, 999);
+      }
     }
 
     const incomeData = await Transaction.aggregate([
@@ -174,19 +232,22 @@ const incomeAnalytic = async (req, res) => {
         $match: {
           addBy: req.user._id,
           transType: "Income",
-          date: { $gte: startDate }
-        }
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
       },
       {
-        $sort: { date: 1 }
+        $sort: { date: 1 },
       },
       {
         $project: {
           _id: 0,
           x: "$date",
-          y: "$amount"
-        }
-      }
+          y: "$amount",
+        },
+      },
     ]);
 
     return res.status(200).json({ chartData: incomeData });
@@ -199,24 +260,46 @@ const incomeAnalytic = async (req, res) => {
 const expenseAnalytic = async (req, res) => {
   try {
     const { timeRange } = req.params;
-    let startDate;
+    const { year, month } = req.query;
 
-    if (timeRange === "weekly") {
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 7);
-    } else if (timeRange === "monthly") {
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 1);
-    } else if (timeRange === "yearly") {
-      startDate = new Date();
-      startDate.setFullYear(startDate.getFullYear() - 1);
+    let startDate, endDate;
+    const currentMonth = new Date();
+
+    if (year && month) {
+      const selectedYear = parseInt(year);
+      const selectedMonth = parseInt(month);
+
+      if (
+        timeRange === "weekly" &&
+        selectedYear === new Date().getFullYear() &&
+        selectedMonth === new Date().getMonth() + 1
+      ) {
+        startDate = new Date(); 
+        startDate.setDate(startDate.getDate() - 7);
+        endDate = new Date();
+      } else if (timeRange === "monthly") {
+        startDate = new Date(selectedYear, selectedMonth - 1, 1);
+        endDate = new Date(selectedYear, selectedMonth, 0);
+        endDate.setHours(23, 59, 59, 999);
+      } else if (timeRange === "yearly") {
+        startDate = new Date(selectedYear - 1, selectedMonth - 1, 1);
+        endDate = new Date(selectedYear, selectedMonth, 0);
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        startDate = new Date(selectedYear, selectedMonth - 1, 1);
+        endDate = new Date(selectedYear, selectedMonth, 0);
+        endDate.setHours(23, 59, 59, 999);
+      }
     }
 
     const expenseData = await Transaction.aggregate([
       {
         $match: {
           addBy: req.user._id,
-          date: { $gte: startDate },
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
           transType: "Expense",
         },
       },
@@ -273,7 +356,10 @@ const handleEditById = async (req, res) => {
     }
 
     if (
-      [transName, date, tag, paymentMode].some(field => field?.trim() === "") || amount === undefined
+      [transName, date, tag, paymentMode].some(
+        (field) => field?.trim() === ""
+      ) ||
+      amount === undefined
     ) {
       return res.status(400).json({ message: "All Fields Are Required!" });
     }
@@ -287,16 +373,47 @@ const handleEditById = async (req, res) => {
           date,
           tag,
           paymentMode,
-        }
+        },
       },
-      {new: true},
-    )
+      { new: true }
+    );
 
-    if(!transaction){
-      return res.status(404).json({message: "Not Found"});
+    if (!transaction) {
+      return res.status(404).json({ message: "Not Found" });
     }
 
-    return res.status(200).json({message: "Transaction Updated", transaction})
+    return res
+      .status(200)
+      .json({ message: "Transaction Updated", transaction });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Errors" });
+  }
+};
+
+const handleBalanceReset = async (req, res, next) => {
+  try {
+    const { year = new Date().getFullYear(), month = new Date().getMonth() } =
+      req.query;
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    endDate.setHours(23, 59, 59, 999)
+
+    const deleteTransaction = await Transaction.deleteMany({
+      addBy: req.user?._id,
+      date: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    });
+
+    // console.log(deleteTransaction)
+    if (!deleteTransaction) {
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+    return res.status(200).json({ message: "Balance Reset Successful!" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Errors" });
@@ -312,4 +429,5 @@ export {
   expenseAnalytic,
   deleteById,
   handleEditById,
+  handleBalanceReset,
 };

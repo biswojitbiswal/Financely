@@ -31,29 +31,153 @@ body{
   font-size: 1.5rem;
   margin-bottom: 1rem;
 }
-#dashboard{
-  min-height: 85vh;
-}
+
 #error{
   min-height: 85vh;
   text-align: center;
 }
 #dashboard{
+  min-height: 85vh;
   padding: 1rem 3rem;
 }
 
+.pie-header{
+  display: flex;
+  justify-content: space-between;
+}
+.pie-chart{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: 33%;
+}
+.line-chart{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: 67%;
+}
+.line-chart-graph{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
+}
+.charts{
+  /* width: 100%; */
+  height: 500px;
+}
+.pie-chart-graph{
+  height: 100%;
+}
+.filter-box{
+  width: 25%;
+}
+.search-box{
+  width: 75%;
+}
 
+@media (max-width: 1250px) {
+  #dashboard{
+    padding: 8px
+  }
+  .pie-header{
+    display: flex;
+    /* flex-direction: column; */
+  }
+  .pie-chart{
+    height: 100%;
+    width: 40%;
+  }
+  .line-chart{
+    height: 100%;
+    width: 60%;
+  }
+  .charts{
+    height: 450px;
+  }
+  .pie-chart-graph{
+    height: 350px;
+  }
+  .line-chart-graph{
+    height: 350px;
+  }
+}
 
-
-
-
-
-
+@media (max-width: 1024px) {
+  .charts{
+    height: 400px;
+  }
+  .pie-header{
+    display: flex;
+    flex-direction: column;
+  }
+  .pie-chart{
+    height: 100%;
+    width: 40%;
+  }
+  .line-chart{
+    height: 100%;
+    width: 60%;
+  }
+  .pie-chart-graph{
+    height: 300px;
+  }
+  .line-chart-graph{
+    height: 400px;
+  }
+  .filter-box{
+    width: 35%;
+  }
+  .search-box{
+    width: 65%;
+  }
+  
+}
 
 @media (max-width: 768px){
   .signin-page{
       width: 90%;
       padding: 1rem;
+  }
+  .charts{
+    height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .pie-chart{
+    height: 100%;
+    width: 100%;
+  }
+  .line-chart{
+    height: 350px;
+    width: 100%;
+  }
+  .pie-header{
+    display: flex;
+    flex-direction: row;
+  }
+  .pie-chart-graph{
+    height: 330px;
+  }
+  
+
+}
+
+@media (max-width: 560px) {
+  .transaction-btns{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .line-chart{
+    height: 300px;
+    width: 100%;
   }
 }

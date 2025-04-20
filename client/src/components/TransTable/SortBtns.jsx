@@ -4,7 +4,7 @@ import { Button } from 'react-bootstrap'
 function SortBtns({handleSort, sortOption}) {
     
     return (
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 mb-2">
             <Button variant="outline-primary" onClick={() => handleSort('createdAt')} active={sortOption === 'createdAt'}>
                 No Sort
             </Button>

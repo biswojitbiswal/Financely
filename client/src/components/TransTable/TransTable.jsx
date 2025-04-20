@@ -40,7 +40,7 @@ function TransTable({ transactions }) {
 
     return (
         <>
-            <Table responsive="sm" className='text-center fs-5'>
+            <Table className='text-center fs-5 transaction-table'>
                 <thead>
                     <tr className='fs-4'>
                         <th>SL No.</th>
@@ -59,11 +59,11 @@ function TransTable({ transactions }) {
                         transactions && transactions.length > 0 ? (
                             transactions.map((item, index) => {
                                 return (
-                                    <tr key={item._id}>
+                                    <tr key={item._id} className='m-2'>
                                         <td>{index + 1}</td>
-                                        <td>{item.transName}</td>
+                                        <td style={{minWidth: '110px'}}>{item.transName}</td>
                                         <td>{item.tag}</td>
-                                        <td>{new Date(item.date).toLocaleDateString('en-GB').replace(/\//g, '-')}</td>
+                                        <td style={{minWidth: '130px'}}>{new Date(item.date).toLocaleDateString('en-GB').replace(/\//g, '-')}</td>
                                         <td className={`${item.transType === 'Income' ? 'text-success' : 'text-danger'}`}>{item.transType === 'Income' ? `+${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : `-${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                         </td>
                                         <td><Badge className='p-2' bg={item.transType === 'Income' ? 'success' : 'danger'}>{item.transType}</Badge></td>
@@ -75,8 +75,9 @@ function TransTable({ transactions }) {
                             })
                         ) : (
                             <tr>
-                                <td colSpan="9" className="text-center">
-                                    Not Found
+                                <td colSpan="9" className="text-center text-secondary fs-3">
+                                    <div><i className="fa-solid fa-file fs-1"></i></div>
+                                    <p>Transactions Not Found</p>
                                 </td>
                             </tr>
                         )

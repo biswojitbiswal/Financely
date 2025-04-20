@@ -7,6 +7,7 @@ import SearchFilter from './SearchFilter';
 import TransTable from './TransTable';
 import { toast } from 'react-toastify';
 import { useRefresh } from '../../Store/RefreshContext';
+import { useDate } from '../../Store/DateContext';
 
 
 function Transaction() {
@@ -17,13 +18,15 @@ function Transaction() {
     const [filterType, setFilterType] = useState("");
 
     const { authorization } = useAuth();
-    const {refresh} = useRefresh();
+    const {refresh, toggleRefresh} = useRefresh();
+    const {selectedMonth, selectedYear} = useDate()
+    // console.log(selectedMonth, selectedYear);
 
     let timeoutId;
 
     const getAllTransaction = async (sortBy, sortOrder, search, filter) => {
         try {
-            const response = await fetch(`${BASE_URL}/api/financely/transaction/get?sortBy=${sortBy}&sortOrder=${sortOrder}&search=${search}&filter=${filter}`, {
+            const response = await fetch(`${BASE_URL}/api/financely/transaction/get?sortBy=${sortBy}&sortOrder=${sortOrder}&search=${search}&filter=${filter}&year=${selectedYear}&month=${selectedMonth}`, {
                 method: "GET",
                 headers: {
                     Authorization: authorization,
@@ -35,6 +38,9 @@ function Transaction() {
 
             if (response.ok) {
                 setTransactions(data);
+            } else if (response.status === 404) {
+                // Clear transactions when none are found
+                setTransactions([]);
             }
         } catch (error) {
             console.log(error);
@@ -69,7 +75,7 @@ function Transaction() {
 
     useEffect(() => {
         getAllTransaction(sortOption, sortOrder, searchTerm, filterType);
-    }, [sortOption, sortOrder, filterType, refresh]);
+    }, [sortOption, sortOrder, filterType, refresh, selectedYear, selectedMonth]);
 
     return (
         <>
@@ -77,13 +83,15 @@ function Transaction() {
                 <SearchFilter handleSearch={handleSearch} handleFilterChange={handleFilterChange} searchTerm={searchTerm}  />
                 
                 <div className="w-100 mt-2 p-2 d-flex flex-column justify-content-center rounded-2" style={{ backgroundColor: '#f1f1f1' }}>
-                    <div className="my-2 d-flex justify-content-between">
+                    <div className="my-2 transaction-btns">
                         <SortBtns handleSort={handleSort} sortOption={sortOption} />
 
                         <ExportImport transactions={transactions} />
                     </div>
-                    <TransTable transactions={transactions} 
-                    />
+                    <div className='table-responsive'>
+                    <TransTable transactions={transactions} />
+                    </div>
+                    
                 </div>
             </section>
         </>

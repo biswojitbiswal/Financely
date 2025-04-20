@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import authVerify from '../middleware/auth.middleware.js'
-import {addTransaction, fetchTotalSummary, getAllTransaction, importTransaction, incomeAnalytic, expenseAnalytic, deleteById, handleEditById} from '../controller/transaction.controller.js'
+import {addTransaction, fetchTotalSummary, getAllTransaction, importTransaction, incomeAnalytic, expenseAnalytic, deleteById, handleEditById, handleBalanceReset} from '../controller/transaction.controller.js'
 import {upload} from '../middleware/multer.middleware.js';
 
 const router = Router();
@@ -13,5 +13,6 @@ router.route("/income/:timeRange").get(authVerify, incomeAnalytic)
 router.route("/expense/:timeRange").get(authVerify, expenseAnalytic)
 router.route("/delete/:id").delete(authVerify, deleteById)
 router.route("/edit/:id").patch(authVerify, handleEditById)
+router.route("/reset").delete(authVerify, handleBalanceReset)
 
 export default router

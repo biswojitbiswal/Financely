@@ -5,6 +5,7 @@ function SearchFilter({handleSearch, handleFilterChange, searchTerm}) {
   return (
     <div className="d-flex gap-2">
                     <Form.Control
+                      className='search-box'
                         type="text"
                         id="inputSearch"
                         aria-describedby="searchBlock"
@@ -12,7 +13,7 @@ function SearchFilter({handleSearch, handleFilterChange, searchTerm}) {
                         value={searchTerm}
                         onChange={handleSearch}
                     />
-                    <Form.Select aria-label="Default select example" onChange={handleFilterChange} className='w-25'>
+                    <Form.Select aria-label="Default select example" onChange={handleFilterChange} className='filter-box'>
                         <option value="">All</option>
                         <option value="Income">Income</option>
                         <option value="Expense">Expense</option>
