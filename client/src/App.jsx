@@ -8,6 +8,7 @@ import Error from './components/Error/Error'
 import Signout from './components/Signout/Signout'
 import Footer from './components/Footer/Footer'
 import Recurring from './components/Recurring/Recurring'
+import Profile from './components/Profile/Profile'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path='/' element={<Signin />} />
         <Route path='/dashboard' element={<Home />} />
         <Route path='/recurring' element={<Recurring />} />
+        <Route path='/profile' element={<Profile />} />
         <Route path='/signup' element={<Signup />} />
         <Route path='/signout' element={<Signout />} />
        

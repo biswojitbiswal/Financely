@@ -1,4 +1,5 @@
 import { User } from "../model/user.model.js";
+import { uploadFileOnCloudinary } from "../utils/cloudinary.utils.js";
 
 
 const generateAccessToken = async(userId) => {
@@ -181,9 +182,92 @@ const authnticateWithGoogle = async(req, res, next) => {
     }
 }
 
+const profileImageUpdate = async (req, res, next) => {
+    try {
+      const file = req.files?.profile[0].path;
+      console.log(file);
+      if (!file) {
+        return res.status(400).json({ message: "Image file is required!" });
+      }
+  
+      const uploadedFile = await uploadFileOnCloudinary(file);
+      console.log(uploadedFile);
+      if (!uploadedFile || !uploadedFile.data.secure_url) {
+        return res.status(500).json({ message: "File Upload Failed" });
+      }
+  
+      const profile = uploadedFile.data.secure_url;
+  
+      await User.findByIdAndUpdate(req.user._id, { profile });
+  
+      return res.status(201).json({ message: "Profile Image Updated" });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
+  const changeUsername = async (req, res, next) => {
+    try {
+      const { username } = req.body;
+  
+      if (!username) {
+        return res.status(400).json({ message: "Username Required" });
+      }
+  
+      const user = req.user;
+  
+      if (!user) {
+        return res.status(400).json({ message: "Unauthorized User" });
+      }
+  
+      user.name = username;
+      await user.save();
+  
+      return res.status(201).json({ message: "Username Changed" });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
+  const resetPassword = async (req, res, next) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+  
+      if ([oldPassword, newPassword].some((field) => field.trim() === "")) {
+        return res.status(400).json({ message: "All Fields Required" });
+      }
+  
+      const user = await User.findById(req.user._id).select("_id password");
+  
+      if (!user) {
+        return res.status(404).json({ message: "User Not Found" });
+      }
+  
+      if(oldPassword === newPassword){
+          return res.status(400).json("Old Password & New Password  Must Be Different")
+      }
+  
+      const isPasswordMatch = await user.isPasswordCorrect(oldPassword);
+  
+      if (!isPasswordMatch) {
+        return res.status(403).json({ message: "Invalid User Authentication" });
+      }
+  
+      user.password = newPassword;
+      await user.save();
+  
+      return res.status(201).json({ message: "Password Updated Successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
 export {
     registerUser,
     loginUser,
     getCurrUser,
-    authnticateWithGoogle
+    authnticateWithGoogle,
+    profileImageUpdate,
+    changeUsername,
+    resetPassword,
 }
