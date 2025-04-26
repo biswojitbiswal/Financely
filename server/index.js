@@ -4,6 +4,7 @@ import cors from 'cors'
 import connectDb from './DB/db.js';
 import userRouter from './routes/user.routes.js'
 import transactionRouter from './routes/transaction.routes.js'
+import initializeRecurringTransactions from "./scheduler/recurring.scheduler.js";
 
 
 const app = express();
@@ -39,6 +40,9 @@ connectDb()
         console.log("Error", error);
         throw error;
     })
+
+    initializeRecurringTransactions();
+    
     app.listen(PORT, () => {
         console.log(`App is Listening on: ${PORT}`);
     })

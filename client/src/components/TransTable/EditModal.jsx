@@ -13,16 +13,15 @@ function EditModal({ item, type }) {
         return date.toISOString().split("T")[0];
     };
 
-    const formatDateForDisplay = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        if (isNaN(date)) return "";
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
-    };
-
+    // const formatDateForDisplay = (dateString) => {
+    //     if (!dateString) return "";
+    //     const date = new Date(dateString);
+    //     if (isNaN(date)) return "";
+    //     const day = String(date.getDate()).padStart(2, '0');
+    //     const month = String(date.getMonth() + 1).padStart(2, '0');
+    //     const year = date.getFullYear();
+    //     return `${day}-${month}-${year}`;
+    // };
 
     const [show, setShow] = useState(false);
     const [editData, setEditData] = useState({
@@ -31,26 +30,45 @@ function EditModal({ item, type }) {
         date: formatDateForInput(item.date) || '',
         tag: item.tag || '',
         paymentMode: item.paymentMode || '',
+        isRecurring: item.isRecurring || false,
+        // Only set frequency, startDate, and endDate if it's a recurring transaction
+        frequency: item.isRecurring ? (item.frequency || '') : '',
+        startDate: item.isRecurring ? (item.startDate ? formatDateForInput(item.startDate) : '') : '',
+        endDate: item.isRecurring ? (item.endDate ? formatDateForInput(item.endDate) : '') : '',
     });
 
-    const {authorization} = useAuth();
-    const {toggleRefresh} = useRefresh();
+    const { authorization } = useAuth();
+    const { toggleRefresh } = useRefresh();
 
     const tags = type === 'Income'
         ? ['Salary', 'Freelancing', 'Investment', 'Bonus', 'Others']
         : ['Education', 'Food', 'Health', 'Investment', 'Recharge', 'Rent', 'Transport', 'Others'];
 
+    // Define frequencies and display names
+    const frequencies = ['DAILY', 'WEEKLY', 'MONTHLY', 'QUATERLY', 'HALF_YEARLY', 'YEARLY'];
+
+    const frequencyDisplayNames = {
+        'DAILY': 'Daily',
+        'WEEKLY': 'Weekly',
+        'MONTHLY': 'Monthly',
+        'QUATERLY': 'Quarterly',
+        'HALF_YEARLY': 'Half-Yearly',
+        'YEARLY': 'Yearly'
+    };
+
     const handleClose = () => setShow(false);
     const handleOpen = () => setShow(true);
 
     const handleEditInput = (e) => {
-        setEditData((prev) => ({
+        const { name, value } = e.target;
+        setEditData(prev => ({
             ...prev,
-            [e.target.name]: e.target.value,
+            [name]: value
         }));
     };
 
-    const handleEditSubmit = async() => {
+    const handleEditSubmit = async () => {
+        // console.log("Edit Data:", editData);
         try {
             const response = await fetch(`${BASE_URL}/api/financely/transaction/edit/${item._id}`, {
                 method: "PATCH",
@@ -61,29 +79,22 @@ function EditModal({ item, type }) {
                 body: JSON.stringify(editData)
             })
             const data = await response.json();
-            // console.log(data);
 
-            if(response.ok){
+            if (response.ok) {
                 toast.success("Transaction Updated");
-                toggleRefresh()
+                toggleRefresh();
                 handleClose();
-                setEditData({
-                    transName: '',
-                    amount: '',
-                    date: '',
-                    tag: '',
-                    paymentMode: '',
-                })
             } else {
                 toast.error("Internal Backend Errors");
-            }  
+            }
         } catch (error) {
             handleClose();
             console.log(error);
             toast.error("Error occured while edit!")
+        } finally{
+            toggleRefresh()
         }
     }
-
 
     return (
         <div>
@@ -132,6 +143,45 @@ function EditModal({ item, type }) {
                                 <option value="Debit Card">Debit Card</option>
                             </Form.Select>
                         </Form.Group>
+
+                        {/* For recurring transactions, show frequency and date range */}
+                        {editData.isRecurring && (
+                            <>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Frequency:</Form.Label>
+                                    <Form.Select
+                                        name='frequency'
+                                        value={editData.frequency}
+                                        onChange={handleEditInput}
+                                        required
+                                    >
+                                        <option value="">Select Frequency</option>
+                                        {frequencies.map((freq, idx) => (
+                                            <option key={idx} value={freq}>{frequencyDisplayNames[freq]}</option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Start Date:</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name='startDate'
+                                        value={editData.startDate}
+                                        onChange={handleEditInput}
+                                        required
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>End Date:</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name='endDate'
+                                        value={editData.endDate}
+                                        onChange={handleEditInput}
+                                    />
+                                </Form.Group>
+                            </>
+                        )}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

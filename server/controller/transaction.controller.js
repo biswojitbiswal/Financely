@@ -2,18 +2,27 @@ import { Transaction } from "../model/transaction.model.js";
 import processCSV from "../utils/processCsv.util.js";
 import mongoose from "mongoose";
 import fs from "fs";
-import { time } from "console";
+import processRecurringTransactions from "../services/recurring.services.js";
 
 const addTransaction = async (req, res) => {
   try {
-    const { transName, amount, type, date, tag, paymentMode } = req.body;
+    const { transName, amount, type, date, tag, paymentMode, isRecurring, frequency, startDate, endDate } = req.body;
 
     if (
       [transName, amount, type, date, tag, paymentMode].some(
-        (field) => field.trim() === ""
+        (field) => field?.toString().trim() === ""
       )
     ) {
       return res.status(400).json({ message: "All Fields Are Required!" });
+    }
+
+    if(isRecurring){
+      if(!frequency){
+        return res.status(400).json({ message: "Frequency is required for recurring transactions" });
+      }
+      if(!startDate){
+        return res.status(400).json({ message: "Start date is required for recurring transactions" });
+      }
     }
 
     const transaction = new Transaction({
@@ -24,6 +33,13 @@ const addTransaction = async (req, res) => {
       date,
       tag,
       paymentMode,
+      isRecurring,
+      frequency: isRecurring ? frequency : undefined,
+      startDate: isRecurring ? startDate : undefined,
+      endDate: isRecurring ? endDate : undefined,
+      lastGeneratedDate: isRecurring ? new Date(startDate) : undefined,
+      generatedFromRecurring: isRecurring ? true : false,
+      isActive: isRecurring ? true : false,
     });
 
     await transaction.save();
@@ -349,7 +365,17 @@ const deleteById = async (req, res) => {
 const handleEditById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { transName, amount, tag, paymentMode, date } = req.body;
+    const { 
+      transName, 
+      amount, 
+      tag, 
+      paymentMode, 
+      date, 
+      isRecurring, 
+      frequency, 
+      startDate, 
+      endDate 
+    } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid Transaction ID" });
@@ -361,25 +387,44 @@ const handleEditById = async (req, res) => {
       ) ||
       amount === undefined
     ) {
-      return res.status(400).json({ message: "All Fields Are Required!" });
+      return res.status(400).json({ message: "Basic Fields Are Required!" });
+    }
+
+    if (isRecurring) {
+      if (!frequency || !startDate || !endDate) {
+        return res.status(400).json({ 
+          message: "Frequency and Start Date are required for recurring transactions" 
+        });
+      }
+    }
+
+    const updateObject = {
+      transName,
+      amount,
+      date,
+      tag,
+      paymentMode,
+      isRecurring: Boolean(isRecurring)
+    };
+
+    if (isRecurring) {
+      updateObject.frequency = frequency;
+      updateObject.startDate = startDate;
+      updateObject.endDate = endDate || null;
+    } else {
+      updateObject.frequency = null;
+      updateObject.startDate = null;
+      updateObject.endDate = null;
     }
 
     const transaction = await Transaction.findByIdAndUpdate(
       id,
-      {
-        $set: {
-          transName,
-          amount,
-          date,
-          tag,
-          paymentMode,
-        },
-      },
+      { $set: updateObject },
       { new: true }
     );
 
     if (!transaction) {
-      return res.status(404).json({ message: "Not Found" });
+      return res.status(404).json({ message: "Transaction Not Found" });
     }
 
     return res
@@ -415,8 +460,70 @@ const handleBalanceReset = async (req, res, next) => {
 
     return res.status(200).json({ message: "Balance Reset Successful!" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Errors" });
+    next(error);
+  }
+};
+
+const triggerRecurringTransactions = async(req, res, next) =>{
+  try {
+
+    await processRecurringTransactions();
+
+    return res.status(200).json({
+      message: "Recurring transactions processing triggered successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+const getAllRecurringTransactions = async (req, res, next) => {
+  try {
+      const userId = req.user?._id;
+      const transactions = await Transaction.find({
+        addBy: userId,
+        isRecurring: true,
+      }).sort({ createdAt: -1 });
+
+      if(!transactions || transactions.length === 0) {
+        return res.status(404).json({ message: "No Recurring Transactions Found" });
+      }
+
+      return res.status(200).json(transactions);
+  } catch (error) {
+    next(error);
+  }
+}
+
+const toggleRecurringStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Transaction ID" });
+    }
+
+    const transaction = await Transaction.findById(id);
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    if (!transaction.isRecurring) {
+      return res.status(400).json({ message: "This is not a recurring transaction" });
+    }
+
+    // Toggle the status
+    transaction.isActive = !transaction.isActive;
+    await transaction.save();
+
+    return res.status(200).json({
+      message: `Transaction ${transaction.isActive ? 'activated' : 'paused'} successfully`,
+      transaction
+    });
+  } catch (error) {
+    console.error('Error toggling status:', error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -430,4 +537,7 @@ export {
   deleteById,
   handleEditById,
   handleBalanceReset,
+  triggerRecurringTransactions,
+  getAllRecurringTransactions,
+  toggleRecurringStatus
 };

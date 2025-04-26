@@ -2,70 +2,100 @@ import React, { useState, useEffect } from 'react'
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form'
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify'
 import { useDate } from '../../Store/DateContext';
 
-function TransactionModal({show, onClose, type, handleTransaction}) {
+function TransactionModal({ show, onClose, type, handleTransaction }) {
     const [formData, setFormData] = useState({
         transName: '',
         amount: '',
         date: '',
         tag: '',
-        paymentMode: ''
+        paymentMode: '',
+        isRecurring: false,
+        frequency: '',
+        startDate: '',
+        endDate: ''
     })
 
-    const {selectedMonth, selectedYear} = useDate();
+    const { selectedMonth, selectedYear } = useDate();
 
     useEffect(() => {
         if (show && selectedYear && selectedMonth) {
             let day = 1;
             const currentDate = new Date();
-            
+
             if (selectedYear === currentDate.getFullYear() && selectedMonth === currentDate.getMonth() + 1) {
                 day = currentDate.getDate();
             }
-            
+
             const month = selectedMonth.toString().padStart(2, '0');
             const dayStr = day.toString().padStart(2, '0');
             const dateStr = `${selectedYear}-${month}-${dayStr}`;
-            
+
             setFormData(prevState => ({
                 ...prevState,
-                date: dateStr
+                date: dateStr,
+                startDate: dateStr // Set start date same as transaction date
             }));
         }
     }, [show, selectedYear, selectedMonth]);
 
     const tags = type === 'Income'
-    ? ['Salary', 'Freelancing', 'Investment', 'Bonus', 'Others'] : ['Education', 'Food', 'Health', 'Investment', 'Recharge', 'Rent', 'Transport', 'Others'];
+        ? ['Salary', 'Freelancing', 'Investment', 'Bonus', 'Others'] : ['Education', 'Food', 'Health', 'Investment', 'Recharge', 'Rent', 'Transport', 'Bill', 'Others'];
+
+    const frequencies = ['DAILY', 'WEEKLY', 'MONTHLY', 'QUATERLY', 'HALF_YEARLY', 'YEARLY'];
+
+    const frequencyDisplayNames = {
+        'DAILY': 'Daily',
+        'WEEKLY': 'Weekly',
+        'MONTHLY': 'Monthly',
+        'QUATERLY': 'Quarterly',
+        'HALF_YEARLY': 'Half-Yearly',
+        'YEARLY': 'Yearly'
+    };
 
     const handleInput = (e) => {
+        const { name, value, type, checked } = e.target;
+        const newValue = type === 'checkbox' ? checked : value;
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: newValue
         })
     }
 
     const handleSubmit = () => {
-        if(!formData.transName || !formData.amount || !formData.date || !formData.tag || !formData.paymentMode){
+        if (!formData.transName || !formData.amount || !formData.date || !formData.tag || !formData.paymentMode) {
             toast.error("All Fields Required!");
             return;
         }
-        handleTransaction({...formData, type});
+
+        // Check recurring fields if isRecurring is true
+        if (formData.isRecurring && (!formData.frequency || !formData.startDate || !formData.endDate)) {
+            toast.error("All recurring transaction fields are required!");
+            return;
+        }
+
+        handleTransaction({ ...formData, type });
         setFormData({
             transName: '',
             amount: '',
             date: '',
             tag: '',
-            paymentMode: ''
+            paymentMode: '',
+            isRecurring: false,
+            frequency: '',
+            startDate: '',
+            endDate: ''
         })
         onClose();
     }
 
-    
-  return (
-    <div>
-      <Modal show={show} onHide={onClose}>
+
+    return (
+        <div>
+            <Modal show={show} onHide={onClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add {type}</Modal.Title>
                 </Modal.Header>
@@ -106,9 +136,64 @@ function TransactionModal({show, onClose, type, handleTransaction}) {
                                 <option value="UPI">UPI</option>
                                 <option value="Credit Card">Credit Card</option>
                                 <option value="Debit Card">Debit Card</option>
-                                
                             </Form.Select>
                         </Form.Group>
+
+                        <Form.Group className="mb-4" controlId="recurring-switch">
+                            <Form.Check
+                                type="switch"
+                                id="recurring-switch"
+                                label="Is this a recurring transaction?"
+                                name="isRecurring"
+                                checked={formData.isRecurring}
+                                onChange={handleInput}
+                            />
+                        </Form.Group>
+
+                        {formData.isRecurring && (
+                            <>
+                                <Form.Group className="mb-3" controlId="frequency-select">
+                                    <Form.Label>Frequency: </Form.Label>
+                                    <Form.Select
+                                        aria-label="Frequency select"
+                                        className='w-100'
+                                        name='frequency'
+                                        value={formData.frequency}
+                                        onChange={handleInput}
+                                        required={formData.isRecurring}
+                                    >
+                                        <option value="">Select Frequency</option>
+                                        {
+                                            frequencies.map((freq, idx) => {
+                                                return <option key={idx} value={freq}>{frequencyDisplayNames[freq]}</option>
+                                            })
+                                        }
+                                    </Form.Select>
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="start-date">
+                                    <Form.Label>Start Date: </Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name='startDate'
+                                        value={formData.startDate}
+                                        onChange={handleInput}
+                                        required={formData.isRecurring}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="end-date">
+                                    <Form.Label>End Date: </Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name='endDate'
+                                        value={formData.endDate}
+                                        onChange={handleInput}
+                                        required={formData.isRecurring}
+                                    />
+                                </Form.Group>
+                            </>
+                        )}
 
                     </Form>
                 </Modal.Body>
@@ -121,8 +206,8 @@ function TransactionModal({show, onClose, type, handleTransaction}) {
                     </Button>
                 </Modal.Footer>
             </Modal>
-    </div>
-  )
+        </div>
+    )
 }
 
 export default TransactionModal

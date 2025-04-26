@@ -33,7 +33,33 @@ const transactionSchema = new mongoose.Schema({
     tag:{
         type: String,
         required: true,
-        enum: ['Salary', 'Freelancing', 'Investment', 'Bonus', 'Education', 'Food', 'Health', 'Investment', 'Recharge', 'Rent', 'Transport', 'Others']
+        enum: ['Salary', 'Freelancing', 'Investment', 'Bonus', 'Education', 'Food', 'Health', 'Investment', 'Recharge', 'Rent', 'Transport', 'Bill', 'Others']
+    },
+    isRecurring: {
+        type: Boolean,
+        default: false,
+    },
+    frequency: {
+        type: String,
+        enum: ['DAILY', 'WEEKLY', 'MONTHLY', 'QUATERLY', 'HALF_YEARLY', 'YEARLY'],
+        default: 'DAILY'
+    },
+    startDate: {
+        type: Date
+    },
+    endDate: {
+        type: Date
+    },
+    lastGeneratedDate: {
+        type: Date
+    },
+    generatedFromRecurring: {
+        type: Boolean,
+        default: false,
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
     }
 }, {timestamps: true})
 

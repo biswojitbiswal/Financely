@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import authVerify from '../middleware/auth.middleware.js'
-import {addTransaction, fetchTotalSummary, getAllTransaction, importTransaction, incomeAnalytic, expenseAnalytic, deleteById, handleEditById, handleBalanceReset} from '../controller/transaction.controller.js'
+import {addTransaction, fetchTotalSummary, getAllTransaction, importTransaction, incomeAnalytic, expenseAnalytic, deleteById, handleEditById, handleBalanceReset, triggerRecurringTransactions, getAllRecurringTransactions, toggleRecurringStatus} from '../controller/transaction.controller.js'
 import {upload} from '../middleware/multer.middleware.js';
 
 const router = Router();
@@ -15,4 +15,8 @@ router.route("/delete/:id").delete(authVerify, deleteById)
 router.route("/edit/:id").patch(authVerify, handleEditById)
 router.route("/reset").delete(authVerify, handleBalanceReset)
 
+router.route("/recurring/create").post(triggerRecurringTransactions);
+
+router.route("/recurring").get(authVerify, getAllRecurringTransactions)
+router.route('/recurring/:id/toggle-status').patch(authVerify, toggleRecurringStatus);
 export default router
