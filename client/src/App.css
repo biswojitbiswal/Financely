@@ -38,7 +38,7 @@ body{
 }
 #dashboard{
   min-height: 85vh;
-  padding: 1rem 3rem;
+  padding: 5rem 3rem;
 }
 
 .pie-header{
@@ -90,7 +90,7 @@ body{
 
 @media (max-width: 1250px) {
   #dashboard{
-    padding: 8px
+    padding: 5rem 8px 8px 8px
   }
   .pie-header{
     display: flex;
@@ -184,5 +184,8 @@ body{
   .line-chart{
     height: 300px;
     width: 100%;
+  }
+  .sort-btns{
+    font-size: .9rem;
   }
 }

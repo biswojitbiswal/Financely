@@ -66,7 +66,7 @@ function Cards({ incomeModal, expenseModal, total, loading }) {
   return (
     <div className='w-100 summary-card'>
       <Card variant='light' border="light" className='p-1 summ-card' style={{
-        flex: "1", height: '180px', background: ' #0505FF',
+        flex: "1", height: '180px',
         background: 'linear-gradient(90deg,rgba(5, 5, 255, 1) 0%, rgba(13, 110, 253, 1) 100%)'
       }}>
         <Card.Body>

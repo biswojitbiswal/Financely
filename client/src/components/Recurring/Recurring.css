@@ -1,5 +1,8 @@
 /* Recurring Transactions Styles */
-
+.container-fluid{
+    padding: 4rem 1rem 1rem 1rem;
+    height: 100vh;
+}
 .recurring-table-wrapper {
     background-color: #fff;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);

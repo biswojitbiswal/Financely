@@ -258,7 +258,7 @@ function Recurring() {
                                             className='text-danger fs-2 pt-0'
                                             title={transaction.isActive ? 'Pause' : 'Resume'}
                                         >
-                                            {transaction.isActive ? <i class="fa-solid fa-pause text-primary"></i> : <i class="fa-solid fa-play text-danger"></i>}
+                                            {transaction.isActive ? <i className="fa-solid fa-pause text-primary"></i> : <i className="fa-solid fa-play text-danger"></i>}
                                         </Button>
                                     </td>
                                     <td><EditModal item={transaction} type={transaction.transType} /></td>

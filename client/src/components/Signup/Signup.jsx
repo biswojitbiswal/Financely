@@ -69,7 +69,7 @@ function Signup() {
 
     return (
         <>
-            <section id="form">
+            <section id="form" className='pt-3'>
                 <div className='signin-page bg-light'>
                     <h3 className='mb-4'>Sign Up On <span className='text-primary '>Financely</span></h3>
                     <Form onSubmit={handleSignupForm}>
@@ -90,7 +90,7 @@ function Signup() {
                             <Form.Label>Confirm Password:</Form.Label>
                             <Form.Control type="password" name='cpassword' placeholder="Confirm Password" required value={signupData.cpassword} onChange={handleInputData} />
                         </Form.Group>
-                        <Button variant="outline-primary" className='w-100 fs-5' type="submit">
+                        <Button variant="primary" className='w-100 fs-5' type="submit">
                             Sign Up With Email & Password
                         </Button>
                     </Form>

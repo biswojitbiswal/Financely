@@ -59,10 +59,10 @@ function MyNavbar() {
     { name: 'Home', href: '/dashboard', icon: <Home size={20} /> },
     {name: 'Recurring', href: '/recurring', icon: <Timer size={20} />},
     { name: 'Profile', href: '/profile', icon: <User size={20} /> },
-    { name: 'Reports', href: '/reports', icon: <FileText size={20} /> },
-    { name: 'Analytics', href: '/analytics', icon: <BarChart size={20} /> },
-    { name: 'Notifications', href: '/notifications', icon: <Bell size={20} /> },
-    { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
+    // { name: 'Reports', href: '/reports', icon: <FileText size={20} /> },
+    // { name: 'Analytics', href: '/analytics', icon: <BarChart size={20} /> },
+    // { name: 'Notifications', href: '/notifications', icon: <Bell size={20} /> },
+    // { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
     { 
       name: isLoggedInuser ? 'Sign Out' : 'Sign In', 
       href: isLoggedInuser ? '/signout' : '/', 
@@ -72,7 +72,7 @@ function MyNavbar() {
 
   return (
     <>
-      <Navbar className="bg-primary">
+      <Navbar className="bg-primary fixed-top">
         <Container className=''>
           <Navbar.Brand href="/dashboard" className='text-white fs-2'>Financely</Navbar.Brand>
 

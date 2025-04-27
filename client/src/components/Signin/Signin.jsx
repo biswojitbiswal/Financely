@@ -72,7 +72,7 @@ function Signin() {
             <Form.Label>Password</Form.Label>
             <Form.Control type="password" name='password' placeholder="Password" value={signinData.password} onChange={handleInput} required />
           </Form.Group>
-          <Button variant="outline-primary" className='w-100 fs-5' type="submit">
+          <Button variant="primary" className='w-100 fs-5' type="submit">
             Sign In With Email & Password
           </Button>
         </Form>
