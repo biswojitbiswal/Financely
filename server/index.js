@@ -5,6 +5,7 @@ import connectDb from './DB/db.js';
 import userRouter from './routes/user.routes.js'
 import transactionRouter from './routes/transaction.routes.js'
 import initializeRecurringTransactions from "./scheduler/recurring.scheduler.js";
+import cronRouter from "./routes/cron.routes.js";
 
 
 const app = express();
@@ -25,6 +26,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({extended: true, limit: "10mb"}))
 app.use(express.static("public"));
+
+app.use(cronRouter);
 
 app.use("/api/financely/user", userRouter);
 app.use("/api/financely/transaction", transactionRouter);
