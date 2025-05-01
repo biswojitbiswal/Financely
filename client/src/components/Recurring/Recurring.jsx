@@ -151,7 +151,7 @@ function Recurring() {
 
     if (isLoading) {
         return (
-            <div className="recurring-loader-container">
+            <div className="recurring-loader-container" style={{height: '100vh'}}>
                 <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Loading...</span>
                 </div>
@@ -273,7 +273,7 @@ function Recurring() {
                 </div>
 
                 {transactions.length === 0 && (
-                    <div className="recurring-no-data">
+                    <div className="recurring-no-data" style={{height: '100vh'}}>
                         No recurring transactions found
                     </div>
                 )}
