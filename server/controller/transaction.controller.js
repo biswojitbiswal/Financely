@@ -146,10 +146,10 @@ const getAllTransaction = async (req, res) => {
       search = "",
       filter = "",
       year = new Date().getFullYear(),
-      month = new Date().getMonth(),
+      month = new Date().getMonth() + 1, // Adjust to 1-indexed month
     } = req.query;
 
-    // console.log(year, month);
+    // console.log("Query params:", { year, month });
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized Access" });
@@ -165,10 +165,22 @@ const getAllTransaction = async (req, res) => {
     }
 
     if (year && month) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      // Parse as integers to avoid string concatenation issues
+      const yearInt = parseInt(year);
+      const monthInt = parseInt(month);
+      
+      // Create date range in local timezone (consistent with your recurring transaction service)
+      const startDate = new Date(yearInt, monthInt - 1, 1);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(yearInt, monthInt, 0);
       endDate.setHours(23, 59, 59, 999);
-      // console.log(startDate, endDate)
+      
+      // console.log("Date range:", { 
+      //   startDate: startDate.toISOString(), 
+      //   endDate: endDate.toISOString() 
+      // });
+      
       query.date = {
         $gte: startDate,
         $lte: endDate,
@@ -195,11 +207,16 @@ const getAllTransaction = async (req, res) => {
       sortOption.createdAt = sortOrder === "asc" ? 1 : -1;
     }
 
+    // console.log("MongoDB query:", JSON.stringify(query));
+    
     const transactions = await Transaction.find(query).sort(sortOption);
 
     if (!transactions || transactions.length === 0) {
       return res.status(404).json({ message: "Transaction Not Found" });
     }
+
+    // Optional: log first few transactions to debug
+    // console.log("First transaction:", transactions[0]?.date);
 
     return res.status(200).json(transactions);
   } catch (error) {
